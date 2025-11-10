@@ -14,7 +14,6 @@ public class UserEntity extends BaseEntity {
 	private String userName;
 	private String password;
 	private String avatarUrl;
-	private String defaultAvatarUrl;
 	private String phoneNumber;
 	private String fullName;
 	
@@ -76,12 +75,6 @@ public class UserEntity extends BaseEntity {
 	}
 	public void setReceivedFriendRequest(List<FriendRequestEntity> receivedFriendRequest) {
 		this.receivedFriendRequest = receivedFriendRequest;
-	}
-	public String getDefaultAvatarUrl() {
-		return defaultAvatarUrl;
-	}
-	public void setDefaultAvatarUrl(String defaultAvatarUrl) {
-		this.defaultAvatarUrl = defaultAvatarUrl;
 	}
 	public String getPhoneNumber() {
 		return phoneNumber;

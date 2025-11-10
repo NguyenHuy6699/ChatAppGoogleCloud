@@ -1,14 +1,9 @@
 package com.cloudrun.microservicetemplate.huy.serviceImpl;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,25 +18,25 @@ import com.cloudrun.microservicetemplate.huy.firebase.message.FcmSender;
 import com.cloudrun.microservicetemplate.huy.model.Status;
 import com.cloudrun.microservicetemplate.huy.repository.UserRepository;
 import com.cloudrun.microservicetemplate.huy.service.UserService;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 
 @Service
 public class UserServiceImpl implements UserService {
 	@Autowired
 	private UserRepository userRepository;
 
-	@Value("${upload.avatar.path}")
-	private String uploadPath;
-
-	@Value("${default.avatar.path}")
-	private String defaultAvatarPath;
-
-	private String defaultAvatarName = "default_avatar.png";
-
-	@Value("${address}")
-	private String serverAddress;
-
 	@Value("${server.port}")
 	private String serverPort;
+	
+	@Value("${google.project.id}")
+	private String ggProjectId;
+	
+	@Value("${google.storage.bucket.name}")
+	private String ggBucketName;
 
 	@Override
 	public boolean saveUser(UserEntity user) {
@@ -153,8 +148,7 @@ public class UserServiceImpl implements UserService {
 		newUser.setPassword(password);
 		newUser.setFullName(fullName);
 		newUser.setPhoneNumber(phoneNumber);
-		newUser.setDefaultAvatarUrl(
-				serverAddress + ":" + serverPort + com.cloudrun.microservicetemplate.huy.constant.Paths.default_avatar_url + "/" + defaultAvatarName);
+		
 		UserEntity newUser2 = userRepository.save(newUser);
 		if (newUser2 != null) {
 			return new BaseResponse<>(true, "Đăng ký thành công");
@@ -187,19 +181,34 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public String updateAvatar(UserEntity user, MultipartFile file) throws IOException {
-		// delete existing avatar
-		if (user.getAvatarUrl() != null && !user.getAvatarUrl().equals("")) {
-			File existAvatar = new File(user.getAvatarUrl());
-			deleteFile(uploadPath, existAvatar.getName());
+		String fileName = file.getOriginalFilename();
+		Storage storage = StorageOptions.newBuilder().setProjectId(ggProjectId).build().getService();
+		BlobId blobId = BlobId.of(ggBucketName, fileName);
+		BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
+		byte[] data = file.getBytes();
+		
+		Storage.BlobTargetOption precondition;
+		if (storage.get(ggBucketName, fileName) == null) {
+			precondition = Storage.BlobTargetOption.doesNotExist();
+		} else {
+			precondition = Storage.BlobTargetOption.generationMatch(storage.get(ggBucketName, fileName).getGeneration());
 		}
-
-		String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-		Path filePath = Paths.get(uploadPath, fileName);
-		Files.createDirectories(filePath.getParent());
-		Files.write(filePath, file.getBytes());
-		user.setAvatarUrl(serverAddress + ":" + serverPort + com.cloudrun.microservicetemplate.huy.constant.Paths.avatar_url + "/" + fileName);
-		saveUser(user);
-		return user.getAvatarUrl();
+		
+		String avatarUrl = null;
+		try {
+			Blob blob = storage.create(blobInfo, data, precondition);
+			if (blob != null) {
+				System.out.println(user.getUserName() + "upload avatar success");
+				if (blob.getMediaLink() != null) {
+					avatarUrl = blob.getMediaLink();
+					user.setAvatarUrl(avatarUrl);
+					saveUser(user);
+				}
+			}
+		} catch (Exception e) {
+			System.out.println(user.getUserName() + "upload avatar failed: " + e.getMessage());
+		}
+		return avatarUrl;
 	}
 
 	@Override
@@ -221,9 +230,6 @@ public class UserServiceImpl implements UserService {
 		
 		if (userDto.getAvatarUrl() != null && !userDto.getAvatarUrl().isBlank())
 		user.setAvatarUrl(userDto.getAvatarUrl());
-		
-		if (userDto.getDefaultAvatarUrl() != null && !userDto.getDefaultAvatarUrl().isBlank())
-		user.setDefaultAvatarUrl(userDto.getDefaultAvatarUrl());
 		
 		if (userDto.getFullName() != null && !userDto.getFullName().isBlank())
 		user.setFullName(userDto.getFullName());
@@ -255,15 +261,6 @@ public class UserServiceImpl implements UserService {
 			return new BaseResponse<>(true, "Cập nhật mật khẩu thành công");
 		} catch (Exception e) {
 			return new BaseResponse<>(false, "Cập nhật mật khẩu thất bại");
-		}
-	}
-
-	private boolean deleteFile(String filePath, String fileName) {
-		try {
-			Path path = Paths.get(filePath, fileName);
-			return Files.deleteIfExists(path);
-		} catch (Exception e) {
-			return false;
 		}
 	}
 }

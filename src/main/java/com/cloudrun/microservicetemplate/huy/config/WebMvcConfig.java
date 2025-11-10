@@ -9,18 +9,18 @@ import com.cloudrun.microservicetemplate.huy.constant.Paths;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-	@Value("${upload.avatar.path}")
-	private String uploadPath;
-	
-	@Value("${default.avatar.path}")
-	private String defaultAvatarPath;
-	
-	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		registry.addResourceHandler(Paths.avatar_url + "/**")
-		.addResourceLocations("file:" + uploadPath + "/");
-		
-		registry.addResourceHandler(Paths.default_avatar_url + "/**")
-		.addResourceLocations("file:" + defaultAvatarPath + "/");
-	}
+//	@Value("${upload.avatar.path}")
+//	private String uploadPath;
+//	
+//	@Value("${default.avatar.path}")
+//	private String defaultAvatarPath;
+//	
+//	@Override
+//	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+//		registry.addResourceHandler(Paths.avatar_url + "/**")
+//		.addResourceLocations("file:" + uploadPath + "/");
+//		
+//		registry.addResourceHandler(Paths.default_avatar_url + "/**")
+//		.addResourceLocations("file:" + defaultAvatarPath + "/");
+//	}
 }
