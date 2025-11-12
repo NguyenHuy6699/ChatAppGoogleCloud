@@ -1,12 +1,9 @@
 package com.cloudrun.microservicetemplate.huy.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,8 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cloudrun.microservicetemplate.huy.baseResponse.BaseResponse;
 import com.cloudrun.microservicetemplate.huy.constant.Paths;
 import com.cloudrun.microservicetemplate.huy.dto.UserDTO;
-import com.cloudrun.microservicetemplate.huy.dto.output.Contact;
-import com.cloudrun.microservicetemplate.huy.entity.UserEntity;
 import com.cloudrun.microservicetemplate.huy.model.Status;
 import com.cloudrun.microservicetemplate.huy.service.UserService;
 
@@ -36,7 +31,7 @@ public class ContactsController {
 	}
 	
 	@GetMapping("/search_user")
-	public BaseResponse<UserDTO> searchUsers(@RequestParam String query) {
-		return userService.findUserBy(query);
+	public BaseResponse<UserDTO> searchUsers(@RequestParam String query, @RequestParam String searcherName) {
+		return userService.findUsersBy(query, searcherName);
 	}
 }

@@ -17,7 +17,7 @@ public interface UserService {
 	Status addFriend(UserEntity user1, UserEntity user2);
 	Status removeFriend(String userName1, String userName2);
 	BaseResponse<Void> register(String userName, String password, String fullName, String phoneNumber);
-	BaseResponse<UserDTO> findUserBy(String query);
+	BaseResponse<UserDTO> findUsersBy(String query, String searcherName);
 	void sendNotiMessage(String title, String message, String senderUserName, String receiverUserName) throws Exception; 
 	String updateAvatar(UserEntity user, MultipartFile file) throws IOException;
 	BaseResponse<UserDTO> updateProfile(String userName, UserDTO userDto);

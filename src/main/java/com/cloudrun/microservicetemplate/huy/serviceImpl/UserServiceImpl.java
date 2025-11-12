@@ -157,8 +157,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public BaseResponse<UserDTO> findUserBy(String query) {
+	public BaseResponse<UserDTO> findUsersBy(String query, String searcherName) {
 		List<UserEntity> userList = userRepository.findByUserNameContainingIgnoreCase(query);
+		userList.removeIf(user -> user.getUserName().equals(searcherName));
 		List<UserDTO> userDtoList = UserDTOConverter.getInstance().toListDTO(userList);
 		BaseResponse<UserDTO> res = new BaseResponse<UserDTO>();
 		if (userDtoList != null && !userDtoList.isEmpty()) {
