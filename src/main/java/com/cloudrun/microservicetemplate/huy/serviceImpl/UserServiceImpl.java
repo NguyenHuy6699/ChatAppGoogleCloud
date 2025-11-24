@@ -248,10 +248,13 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public BaseResponse<Void> changePassWord(String sessionUserName, String newPassWord) {
+	public BaseResponse<Void> changePassWord(String sessionUserName, String oldPassWord, String newPassWord) {
 		UserEntity user = userRepository.findOneByUserName(sessionUserName);
 		if (user == null) {
 			return new BaseResponse<>(false, "Người dùng không tồn tại");
+		}
+		if (!user.getPassword().equals(oldPassWord)) {
+			return new BaseResponse<>(false, "Mật khẩu cũ không đúng");
 		}
 		if (user.getPassword().equals(newPassWord)) {
 			return new BaseResponse<>(false, "Mật khẩu mới không được trùng mật khẩu cũ");

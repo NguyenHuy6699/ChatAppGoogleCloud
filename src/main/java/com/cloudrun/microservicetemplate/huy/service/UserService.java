@@ -21,5 +21,5 @@ public interface UserService {
 	void sendNotiMessage(String title, String message, String senderUserName, String receiverUserName) throws Exception; 
 	String updateAvatar(UserEntity user, MultipartFile file) throws IOException;
 	BaseResponse<UserDTO> updateProfile(String userName, UserDTO userDto);
-	BaseResponse<Void> changePassWord(String sessionUserName, String newPassWord);
+	BaseResponse<Void> changePassWord(String sessionUserName, String oldPassWord, String newPassWord);
 }

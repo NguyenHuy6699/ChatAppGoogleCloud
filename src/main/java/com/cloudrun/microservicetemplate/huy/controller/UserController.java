@@ -130,7 +130,7 @@ public class UserController {
 	}
 	
 	@PutMapping(Paths.change_password)
-	public BaseResponse<Void> changePassWord(@RequestParam String loggedUserName, @RequestParam String newPassWord, HttpServletRequest req) {
+	public BaseResponse<Void> changePassWord(@RequestParam String loggedUserName, @RequestParam String oldPassWord, @RequestParam String newPassWord, HttpServletRequest req) {
 		HttpSession session = req.getSession(false);
 		if (session == null || session.getAttribute(SessionAtributes.userName) == null) {
 			return new BaseResponse<>(false, "Hết phiên đăng nhập", null);
@@ -139,6 +139,6 @@ public class UserController {
 		if (!sessionUserName.equals(loggedUserName)) {
 			return new BaseResponse<>(false, "Người dùng không hợp lệ", null);
 		}
-		return userService.changePassWord(sessionUserName, newPassWord);
+		return userService.changePassWord(sessionUserName, oldPassWord, newPassWord);
 	}
 }
