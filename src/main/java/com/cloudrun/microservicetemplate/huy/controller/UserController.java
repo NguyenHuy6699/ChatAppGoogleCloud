@@ -129,7 +129,7 @@ public class UserController {
 		return resp;
 	}
 	
-	@PutMapping(Paths.change_password)
+	@PostMapping(Paths.change_password)
 	public BaseResponse<Void> changePassWord(@RequestParam String loggedUserName, @RequestParam String oldPassWord, @RequestParam String newPassWord, HttpServletRequest req) {
 		HttpSession session = req.getSession(false);
 		if (session == null || session.getAttribute(SessionAtributes.userName) == null) {
