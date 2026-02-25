@@ -28,5 +28,8 @@ public class Paths {
 	public static final String cancel_friend_request = "/cancel_friend_request";
 	public static final String accept_friend_request = "/accept_friend_request";
 	public static final String reject_friend_request = "/reject_friend_request";
+	
+	//error
+	public final static String error = "/error";
 
 }
