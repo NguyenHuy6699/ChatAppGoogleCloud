@@ -46,17 +46,17 @@ public class AuthController {
 	public BaseResponse<UserDTO> startupLogin(HttpServletRequest req) {
 		HttpSession session = req.getSession(false);
 		System.out.println("session id " + session.getId());
-		String userName = session != null ? (String) session.getAttribute(SessionAtributes.userName) : null;
+		String userName = (String) session.getAttribute(SessionAtributes.userName);
 
 		if (userName != null) {
 			UserEntity user = userService.findByUserName(userName);
 			if (user != null) {
 				UserDTO userDto = UserDTOConverter.getInstance().toDTO(user);
-				return new BaseResponse<UserDTO>(true, "Welcome", List.of(userDto));
+				return new BaseResponse<>(true, "Welcome", List.of(userDto));
 			}
 		}
 		session.invalidate();
-		return new BaseResponse<UserDTO>(false, "Hết phiên đăng nhập", null);	
+		return new BaseResponse<>(false, "Hết phiên đăng nhập", null);	
 	}
 
 	@PostMapping(Paths.login)
@@ -67,7 +67,7 @@ public class AuthController {
 			@RequestParam String deviceId,
 			HttpServletRequest request) {
 		UserEntity existingUser = userService.findByUserName(userName);
-		UserDTO userDto = null;
+		UserDTO userDto;
 		if (existingUser != null && existingUser.getPassword().equals(password)) {
 			userDto = UserDTOConverter.getInstance().toDTO(existingUser);
 
@@ -76,9 +76,9 @@ public class AuthController {
 			session.setAttribute(SessionAtributes.destroyedCause, null);
 			sessionService.save(session, existingUser, fcmToken, deviceId);
 
-			return new BaseResponse<UserDTO>(true, "Đăng nhập thành công", List.of(userDto));
+			return new BaseResponse<>(true, "Đăng nhập thành công", List.of(userDto));
 		} else {
-			return new BaseResponse<UserDTO>(false, "Sai tên tài khoản hoặc mật khẩu", null);
+			return new BaseResponse<>(false, "Sai tên tài khoản hoặc mật khẩu", null);
 		}
 	}
 

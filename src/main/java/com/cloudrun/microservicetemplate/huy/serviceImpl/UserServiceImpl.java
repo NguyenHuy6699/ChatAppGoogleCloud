@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 		BaseResponse<UserDTO> res = new BaseResponse<>(false, "Không thành công", null);
-		if (friends.size() > 0) {
+		if (!friends.isEmpty()) {
 			res.setOk(true);
 			res.setMessage("Thành công");
 			res.setDataList(friends);
@@ -161,7 +161,7 @@ public class UserServiceImpl implements UserService {
 		List<UserEntity> userList = userRepository.findByUserNameContainingIgnoreCase(query);
 		userList.removeIf(user -> user.getUserName().equals(searcherName));
 		List<UserDTO> userDtoList = UserDTOConverter.getInstance().toListDTO(userList);
-		BaseResponse<UserDTO> res = new BaseResponse<UserDTO>();
+		BaseResponse<UserDTO> res = new BaseResponse<>();
 		if (userDtoList != null && !userDtoList.isEmpty()) {
 			res.setOk(true);
 			res.setMessage("Tìm kiếm user: ok");

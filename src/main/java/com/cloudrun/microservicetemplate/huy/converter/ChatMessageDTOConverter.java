@@ -22,13 +22,16 @@ private static ChatMessageDTOConverter instance;
 	
 	@Override
 	public ChatMessageDTO toDTO (ChatMessage chatMessage) {
-		ChatMessageDTO chatMessageDTO = new ChatMessageDTO();
- 		chatMessageDTO.setMessage(chatMessage.getMessage());
-		chatMessageDTO.setReceiverUserName(chatMessage.getReceiver().getUserName());
-		chatMessageDTO.setSenderUserName(chatMessage.getSender().getUserName());
-		chatMessageDTO.setTimestamp(chatMessage.getTimestamp());
-		
-		return chatMessageDTO;
+		if (chatMessage != null) {
+			ChatMessageDTO chatMessageDTO = new ChatMessageDTO();
+	 		chatMessageDTO.setMessage(chatMessage.getMessage());
+			chatMessageDTO.setReceiverUserName(chatMessage.getReceiver().getUserName());
+			chatMessageDTO.setSenderUserName(chatMessage.getSender().getUserName());
+			chatMessageDTO.setTimestamp(chatMessage.getTimestamp());
+			
+			return chatMessageDTO;
+		}
+		return null;
 	}
 	
 	@Override

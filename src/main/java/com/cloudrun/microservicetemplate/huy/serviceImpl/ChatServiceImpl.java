@@ -1,6 +1,5 @@
 package com.cloudrun.microservicetemplate.huy.serviceImpl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +18,8 @@ public class ChatServiceImpl implements ChatService {
 	private ChatRepository chatRepo;
 	
 	@Override
-	public BaseResponse<ChatMessageDTO> getChatHistory(String userA, String userB) {
-		List<ChatMessage> chatMessageList = chatRepo.getChatHistory(userA, userB);
+	public BaseResponse<ChatMessageDTO> getChatHistory(String userA, String userB, int from, int limit) {
+		List<ChatMessage> chatMessageList = chatRepo.getChatHistory(userA, userB, from, limit);
 		return new BaseResponse<>(true, null, ChatMessageDTOConverter.getInstance().toListDTO(chatMessageList));
 	}
 

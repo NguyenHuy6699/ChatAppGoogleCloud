@@ -19,8 +19,10 @@ public class ChatController {
 	@GetMapping("/history")
 	public BaseResponse<ChatMessageDTO> getChatHistory(
 			@RequestParam String userA, 
-			@RequestParam String userB
-			) {
-		return chatService.getChatHistory(userA, userB);
+			@RequestParam String userB,
+			@RequestParam int from,
+			@RequestParam int limit
+		) {
+		return chatService.getChatHistory(userA, userB, from, limit);
 	}
 }

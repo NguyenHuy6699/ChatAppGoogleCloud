@@ -6,5 +6,5 @@ import com.cloudrun.microservicetemplate.huy.entity.ChatMessage;
 
 public interface ChatService {
 	void save(ChatMessage message);
-	BaseResponse<ChatMessageDTO> getChatHistory(String userA, String userB);
+	BaseResponse<ChatMessageDTO> getChatHistory(String userA, String userB, int from, int limit);
 }

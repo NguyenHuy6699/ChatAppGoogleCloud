@@ -22,12 +22,15 @@ private static FriendRequestDTOConverter instance;
 	
 	@Override
 	public FriendRequestDTO toDTO(FriendRequestEntity entity) {
-		FriendRequestDTO frReqDto = new FriendRequestDTO();
-		frReqDto.setId(entity.getId());
-		frReqDto.setReceiver(UserDTOConverter.getInstance().toDTO(entity.getReceiver()));
-		frReqDto.setSender(UserDTOConverter.getInstance().toDTO(entity.getSender()));
-		frReqDto.setStatus(entity.getStatus());
-		return frReqDto;
+		if (entity != null) {
+			FriendRequestDTO frReqDto = new FriendRequestDTO();
+			frReqDto.setId(entity.getId());
+			frReqDto.setReceiver(UserDTOConverter.getInstance().toDTO(entity.getReceiver()));
+			frReqDto.setSender(UserDTOConverter.getInstance().toDTO(entity.getSender()));
+			frReqDto.setStatus(entity.getStatus());
+			return frReqDto;
+		}
+		return null;
 	}
 	
 	@Override

@@ -75,7 +75,7 @@ public class FriendRequestServiceImpl {
 			if (req.getStatus() == FriendRequestStatus.WAITING)
 				sentReqUserEntity.add(req.getReceiver());
 		}
-		if (sentReqUserEntity.size() == 0) {
+		if (sentReqUserEntity.isEmpty()) {
 			return new BaseResponse<>(false, "Không có lời mời kết bạn gửi đi", null);
 		}
 		sentReqUserDto = UserDTOConverter.getInstance().toListDTO(sentReqUserEntity);
@@ -95,7 +95,7 @@ public class FriendRequestServiceImpl {
 			if (req.getStatus() == FriendRequestStatus.WAITING)
 				receivedReqUserEntity.add(req.getSender());
 		}
-		if (receivedReqUserEntity.size() == 0) {
+		if (receivedReqUserEntity.isEmpty()) {
 			return new BaseResponse<>(false, "Không có lời mời kết bạn đã nhận", null);
 		}
 		receivedReqUserDto = UserDTOConverter.getInstance().toListDTO(receivedReqUserEntity);
@@ -174,7 +174,9 @@ public class FriendRequestServiceImpl {
 			}
 		}
 		
-		return new BaseResponse<>(false, "Chưa từng gửi kết bạn", null);
+		FriendRequestEntity frEntity = new FriendRequestEntity();
+		frEntity.setStatus(FriendRequestStatus.NONE);
+		return new BaseResponse<>(false, null, List.of(FriendRequestDTOConverter.getInstance().toDTO(frEntity)));
 	}
 
 	public boolean removeFriendRequest(UserEntity user1, UserEntity user2) {

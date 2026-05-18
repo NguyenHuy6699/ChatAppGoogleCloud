@@ -22,13 +22,16 @@ public class UserDTOConverter extends BaseConverter<UserEntity, UserDTO> {
 	
 	@Override
 	public UserDTO toDTO (UserEntity userEntity) {
-		UserDTO userDto = new UserDTO();
-		userDto.setId(userEntity.getId());
-		userDto.setUserName(userEntity.getUserName());
-		userDto.setAvatarUrl(userEntity.getAvatarUrl());
-		userDto.setPhoneNumber(userEntity.getPhoneNumber());
-		userDto.setFullName(userEntity.getFullName());
-		return userDto;
+		if (userEntity != null) {
+			UserDTO userDto = new UserDTO();
+			userDto.setId(userEntity.getId());
+			userDto.setUserName(userEntity.getUserName());
+			userDto.setAvatarUrl(userEntity.getAvatarUrl());
+			userDto.setPhoneNumber(userEntity.getPhoneNumber());
+			userDto.setFullName(userEntity.getFullName());
+			return userDto;
+		}
+		return null;
 	}
 	
 	@Override
