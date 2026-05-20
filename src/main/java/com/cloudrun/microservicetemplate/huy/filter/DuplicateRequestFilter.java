@@ -1,28 +1,32 @@
 package com.cloudrun.microservicetemplate.huy.filter;
 
 import java.io.IOException;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.cloudrun.microservicetemplate.huy.constant.FilterOrder;
-import com.cloudrun.microservicetemplate.huy.constant.Paths;
 import com.cloudrun.microservicetemplate.huy.constant.ResponseType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.persistence.criteria.Expression;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 @Component
-public class SessionFilter extends BaseFilter {
+@Order()
+public class DuplicateRequestFilter extends BaseFilter {
+	private final Set<String> processingRequests = ConcurrentHashMap.newKeySet();
 
 	@Autowired
-	public SessionFilter(ObjectMapper objectMapper) {
+	public DuplicateRequestFilter(ObjectMapper objectMapper) {
 		super(objectMapper);
 	}
 
@@ -31,27 +35,30 @@ public class SessionFilter extends BaseFilter {
 			throws IOException, ServletException {
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse resp = (HttpServletResponse) response;
-		HttpSession session = req.getSession(false);
-		String path = req.getServletPath();
 
-		if (path.contains(Paths.login) || path.contains(Paths.register) || path.contains(Paths.avatar_url)
-				|| path.contains(Paths.default_avatar_url)) {
+		String url = req.getRequestURL().toString();
+		String deviceId = req.getHeader("deviceId");
+
+		if (deviceId == null) {
+			writeResponse(resp, ResponseType.device_undefined, false, "Thiết bị không hỗ trợ", null);
+			return;
+		}
+
+		String token = url + "_" + deviceId;
+
+		boolean requestIsNotProcessing = processingRequests.add(token);
+		if (!requestIsNotProcessing) {
+			return;
+		}
+		try {
 			chain.doFilter(request, response);
-			return;
+		} finally {
+			processingRequests.remove(token);
 		}
-		if (session == null) {
-			if (path.contains(Paths.startup_login)) {
-				writeResponse(resp, ResponseType.startup_session_expired, false, "Phiên đăng nhập đã hết hạn", null);
-			} else {
-				writeResponse(resp, ResponseType.session_expired, false, "Phiên đăng nhập đã hết hạn", null);
-			}
-			return;
-		}
-		chain.doFilter(request, response);
 	}
 
 	@Override
 	public int getOrder() {
-		return FilterOrder.Session.ordinal();
+		return FilterOrder.Duplicate.ordinal();
 	}
 }

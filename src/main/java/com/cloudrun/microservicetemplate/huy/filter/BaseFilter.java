@@ -3,6 +3,8 @@ package com.cloudrun.microservicetemplate.huy.filter;
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.core.Ordered;
+
 import com.cloudrun.microservicetemplate.huy.baseResponse.BaseResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -10,7 +12,7 @@ import jakarta.servlet.Filter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 
-public abstract class BaseFilter implements Filter {
+public abstract class BaseFilter implements Filter, Ordered {
 	
 	protected final ObjectMapper objectMapper;
 	
