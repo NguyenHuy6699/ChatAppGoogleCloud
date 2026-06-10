@@ -18,6 +18,8 @@ import com.cloudrun.microservicetemplate.huy.baseResponse.BaseResponse;
 import com.cloudrun.microservicetemplate.huy.constant.Paths;
 import com.cloudrun.microservicetemplate.huy.constant.ResponseType;
 import com.cloudrun.microservicetemplate.huy.constant.SessionAtributes;
+import com.cloudrun.microservicetemplate.huy.constant.WebSocketObjectType;
+import com.cloudrun.microservicetemplate.huy.converter.UserDTOConverter;
 import com.cloudrun.microservicetemplate.huy.dto.FriendRequestDTO;
 import com.cloudrun.microservicetemplate.huy.dto.UserDTO;
 import com.cloudrun.microservicetemplate.huy.entity.SessionEntity;
@@ -25,6 +27,7 @@ import com.cloudrun.microservicetemplate.huy.entity.UserEntity;
 import com.cloudrun.microservicetemplate.huy.model.Status;
 import com.cloudrun.microservicetemplate.huy.service.UserService;
 import com.cloudrun.microservicetemplate.huy.serviceImpl.FriendRequestServiceImpl;
+import com.cloudrun.microservicetemplate.huy.websocket.MySocketHandler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -37,6 +40,8 @@ public class UserController {
 
 	@Autowired
 	private FriendRequestServiceImpl frReqService;
+	@Autowired
+	private MySocketHandler wsHandler;
 
 	@PostMapping(Paths.upload_avatar_path)
 	public ResponseEntity<String> uploadAvatar(@RequestParam String userName, @RequestParam("file") MultipartFile file)
@@ -93,7 +98,7 @@ public class UserController {
 	}
 
 	@PostMapping(Paths.remove_friend)
-	public BaseResponse<Void> removeFriend(@RequestParam String userName1, @RequestParam String userName2) {
+	public BaseResponse<Void> removeFriend(@RequestParam String userName1, @RequestParam String userName2) throws Exception {
 		Status removeFriendStatus = userService.removeFriend(userName1, userName2);
 
 		UserEntity user1 = userService.findByUserName(userName1);
@@ -101,6 +106,14 @@ public class UserController {
 		boolean removeFriendRequestSuccess = frReqService.removeFriendRequest(user1, user2);
 
 		if (removeFriendStatus.isOk() && removeFriendRequestSuccess) {
+			UserDTO user1DTO = UserDTOConverter.getInstance().toDTO(user1);
+			UserDTO user2DTO = UserDTOConverter.getInstance().toDTO(user2);
+			
+			user1DTO.setType(WebSocketObjectType.remove_contact.name());
+			user2DTO.setType(WebSocketObjectType.remove_contact.name());
+			
+			wsHandler.sendData(user2DTO, userName1);
+			wsHandler.sendData(user1DTO, userName2);
 			return new BaseResponse<>(true, "Xóa bạn thành công");
 		} else {
 			return new BaseResponse<>(true, removeFriendStatus.getMessage());

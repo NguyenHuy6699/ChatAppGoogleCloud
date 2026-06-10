@@ -10,5 +10,5 @@ import com.cloudrun.microservicetemplate.huy.entity.UserEntity;
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	@Query("SELECT u FROM UserEntity u LEFT JOIN FETCH u.sessions WHERE u.userName = :userName")
 	UserEntity findOneByUserName(String userName); 
-	List<UserEntity> findByUserNameContainingIgnoreCase(String query);	
+	List<UserEntity> findByUserNameContainingIgnoreCase(String query);
 }

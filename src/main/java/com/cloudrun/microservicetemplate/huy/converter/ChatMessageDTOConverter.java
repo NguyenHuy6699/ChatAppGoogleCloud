@@ -28,6 +28,7 @@ private static ChatMessageDTOConverter instance;
 			chatMessageDTO.setReceiverUserName(chatMessage.getReceiver().getUserName());
 			chatMessageDTO.setSenderUserName(chatMessage.getSender().getUserName());
 			chatMessageDTO.setTimestamp(chatMessage.getTimestamp());
+			chatMessageDTO.setRead(chatMessage.isRead());
 			
 			return chatMessageDTO;
 		}

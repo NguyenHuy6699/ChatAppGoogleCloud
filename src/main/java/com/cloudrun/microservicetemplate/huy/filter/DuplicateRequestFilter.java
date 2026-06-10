@@ -5,14 +5,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.cloudrun.microservicetemplate.huy.constant.FilterOrder;
 import com.cloudrun.microservicetemplate.huy.constant.ResponseType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.persistence.criteria.Expression;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -21,7 +19,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-@Order()
 public class DuplicateRequestFilter extends BaseFilter {
 	private final Set<String> processingRequests = ConcurrentHashMap.newKeySet();
 

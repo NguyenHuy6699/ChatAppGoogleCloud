@@ -6,6 +6,9 @@ public class UserDTO extends BaseDTO {
 	private String defaultAvatarUrl;
 	private String phoneNumber;
 	private String fullName;
+	private String lastMessage;
+	private int unreadMessages;
+	private String type;
 	
 	public String getUserName() {
 		return userName;
@@ -37,5 +40,22 @@ public class UserDTO extends BaseDTO {
 	public void setFullName(String fullName) {
 		this.fullName = fullName;
 	}
-	
+	public String getLastMessage() {
+		return lastMessage;
+	}
+	public void setLastMessage(String lastMessage) {
+		this.lastMessage = lastMessage;
+	}
+	public int getUnreadMessages() {
+		return unreadMessages;
+	}
+	public void setUnreadMessages(int unreadMessages) {
+		this.unreadMessages = unreadMessages;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
 }

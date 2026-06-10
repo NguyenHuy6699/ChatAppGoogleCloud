@@ -18,13 +18,19 @@ public class ChatServiceImpl implements ChatService {
 	private ChatRepository chatRepo;
 	
 	@Override
-	public BaseResponse<ChatMessageDTO> getChatHistory(String userA, String userB, int from, int limit) {
+	public List<ChatMessage> getChatHistory(String userA, String userB, int from, int limit) {
 		List<ChatMessage> chatMessageList = chatRepo.getChatHistory(userA, userB, from, limit);
-		return new BaseResponse<>(true, null, ChatMessageDTOConverter.getInstance().toListDTO(chatMessageList));
+		return chatMessageList;
 	}
 
 	@Override
 	public void save(ChatMessage message) {
 		chatRepo.save(message);
+	}
+
+	@Override
+	public ChatMessageDTO getLastMessage(String userA, String userB) {
+		ChatMessage lastMessage = chatRepo.getLastMessage(userA, userB);
+		return ChatMessageDTOConverter.getInstance().toDTO(lastMessage);
 	}
 }

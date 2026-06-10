@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 public class ChatMessage extends BaseEntity {
 	private String message;
 	private LocalDateTime timestamp; 
+	private boolean isRead;
 	
 	@ManyToOne
 	@JoinColumn(name = "sender_username", referencedColumnName = "userName")
@@ -54,5 +55,11 @@ public class ChatMessage extends BaseEntity {
 	}
 	public ChatMessage() {
 		super();
+	}
+	public boolean isRead() {
+		return isRead;
+	}
+	public void setRead(boolean read) {
+		this.isRead = read;
 	}
 }

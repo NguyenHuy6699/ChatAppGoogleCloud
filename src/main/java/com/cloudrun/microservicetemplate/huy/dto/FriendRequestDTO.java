@@ -5,6 +5,7 @@ import com.cloudrun.microservicetemplate.huy.status.FriendRequestStatus;
 public class FriendRequestDTO extends BaseDTO {
 	private UserDTO sender;
 	private UserDTO receiver;
+	private String type = "FRIEND_REQUEST";
 	
 	private FriendRequestStatus status;
 	
@@ -30,5 +31,13 @@ public class FriendRequestDTO extends BaseDTO {
 
 	public void setStatus(FriendRequestStatus status) {
 		this.status = status;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 }

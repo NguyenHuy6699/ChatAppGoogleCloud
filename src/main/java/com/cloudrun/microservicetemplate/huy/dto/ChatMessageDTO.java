@@ -2,13 +2,13 @@ package com.cloudrun.microservicetemplate.huy.dto;
 
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
-public class ChatMessageDTO {
+public class ChatMessageDTO extends BaseDTO {
 	private String senderUserName;
 	private String receiverUserName;
 	private String message;
 	private LocalDateTime timestamp;
+	private String type;
+	private boolean read;
 	
 	public String getSenderUserName() {
 		return senderUserName;
@@ -41,5 +41,18 @@ public class ChatMessageDTO {
 		this.timestamp = timestamp;
 	}
 	public ChatMessageDTO() {
-	} 
+		
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	public boolean isRead() {
+		return read;
+	}
+	public void setRead(boolean read) {
+		this.read = read;
+	}
 }

@@ -29,25 +29,32 @@ public class SessionFilter extends BaseFilter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-		HttpServletRequest req = (HttpServletRequest) request;
-		HttpServletResponse resp = (HttpServletResponse) response;
-		HttpSession session = req.getSession(false);
-		String path = req.getServletPath();
+		Thread thread = Thread.currentThread();
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally {
+			HttpServletRequest req = (HttpServletRequest) request;
+			HttpServletResponse resp = (HttpServletResponse) response;
+			HttpSession session = req.getSession(false);
+			String path = req.getServletPath();
 
-		if (path.contains(Paths.login) || path.contains(Paths.register) || path.contains(Paths.avatar_url)
-				|| path.contains(Paths.default_avatar_url)) {
-			chain.doFilter(request, response);
-			return;
-		}
-		if (session == null) {
-			if (path.contains(Paths.startup_login)) {
-				writeResponse(resp, ResponseType.startup_session_expired, false, "Phiên đăng nhập đã hết hạn", null);
-			} else {
-				writeResponse(resp, ResponseType.session_expired, false, "Phiên đăng nhập đã hết hạn", null);
+			if (path.contains(Paths.login) || path.contains(Paths.register) || path.contains(Paths.avatar_url)
+					|| path.contains(Paths.default_avatar_url)) {
+				chain.doFilter(request, response);
+				return;
 			}
-			return;
+			if (session == null) {
+				if (path.contains(Paths.startup_login)) {
+					writeResponse(resp, ResponseType.startup_session_expired, false, "Phiên đăng nhập đã hết hạn", null);
+				} else {
+					writeResponse(resp, ResponseType.session_expired, false, "Phiên đăng nhập đã hết hạn", null);
+				}
+				return;
+			}
+			chain.doFilter(request, response);
 		}
-		chain.doFilter(request, response);
 	}
 
 	@Override

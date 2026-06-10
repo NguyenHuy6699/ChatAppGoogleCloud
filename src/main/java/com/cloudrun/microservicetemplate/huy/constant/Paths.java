@@ -19,6 +19,7 @@ public class Paths {
 	public final static String default_avatar_url = "/default_avatar";
 	public final static String update_profile = "/update_profile";
 	public final static String change_password = "/change_password";
+	public final static String set_read_messages = "/set_read_messages";
 	
 	//friend request
 	public final static String friend_request = "/friend_request";
@@ -28,6 +29,8 @@ public class Paths {
 	public static final String cancel_friend_request = "/cancel_friend_request";
 	public static final String accept_friend_request = "/accept_friend_request";
 	public static final String reject_friend_request = "/reject_friend_request";
+	public static final String get_sent_friend_request_count = "/get_sent_friend_request_count";
+	public static final String get_received_friend_request_count = "/get_received_friend_request_count";
 	
 	//error
 	public final static String error = "/error";

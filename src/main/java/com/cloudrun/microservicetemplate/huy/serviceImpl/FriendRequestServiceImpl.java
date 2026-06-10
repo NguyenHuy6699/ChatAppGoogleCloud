@@ -22,9 +22,9 @@ public class FriendRequestServiceImpl {
 	@Autowired
 	private FriendRequestRepository friendRequestRepo;
 
-	public BaseResponse<Void> sendFriendRequest(UserEntity sender, UserEntity receiver) {
+	public BaseResponse<FriendRequestDTO> sendFriendRequest(UserEntity sender, UserEntity receiver) {
 		if (sender == null || receiver == null) {
-			System.out.println("friend request. From: " + sender.getUserName() + ". To: " + receiver.getUserName()
+			System.out.println("friend request. From: " + sender.getUserName().toString() + ". To: " + receiver.getUserName().toString()
 					+ " : error(user not exist)");
 			return new BaseResponse<>(false, "Người dùng không tồn tại");
 		}
@@ -51,12 +51,13 @@ public class FriendRequestServiceImpl {
 		}
 
 		FriendRequestEntity newFrReq = friendRequestRepo.findBySenderAndReceiver(sender, receiver);
-		BaseResponse<Void> res = new BaseResponse<>();
+		BaseResponse<FriendRequestDTO> res = new BaseResponse<>();
 		if (newFrReq != null) {
 			System.out.println("Saved friend request. From: " + sender.getUserName() + ". To: " + receiver.getUserName()
 					+ " : " + newFrReq);
 			res.setOk(true);
 			res.setMessage("Gửi kết bạn thành công");
+			res.setDataList(List.of(FriendRequestDTOConverter.getInstance().toDTO(newFrReq)));
 		} else {
 			res.setOk(false);
 			res.setMessage("Lỗi gửi kết bạn, vui lòng thử lại");
@@ -64,10 +65,32 @@ public class FriendRequestServiceImpl {
 
 		return res;
 	}
+	
+	public Integer getSentFrReqCount(UserEntity sender) {
+		List<FriendRequestEntity> sentReqList = sender.getSentFriendRequest();
+		int count = 0;
+		for (FriendRequestEntity req : sentReqList) {
+			if (req.getStatus() == FriendRequestStatus.WAITING) {
+				count++;
+			}
+		}
+		return Integer.valueOf(count);
+	}
+	
+	public Integer getReceivedFrReqCount(UserEntity receiver) {
+		List<FriendRequestEntity> receivedReqList = receiver.getReceivedFriendRequest();
+		int count = 0;
+		for (FriendRequestEntity req : receivedReqList) {
+			if (req.getStatus() == FriendRequestStatus.WAITING) {
+				count++;
+			}
+		}
+		return Integer.valueOf(count);
+	}
 
 	public BaseResponse<UserDTO> getSentFriendRequest(UserEntity user) {
 		List<FriendRequestEntity> sentReqList = user.getSentFriendRequest();
-		if (sentReqList == null && sentReqList.isEmpty())
+		if (sentReqList == null || sentReqList.isEmpty())
 			return new BaseResponse<>(false, "Không có lời mời kết bạn gửi đi", null);
 		List<UserEntity> sentReqUserEntity = new ArrayList<>();
 		List<UserDTO> sentReqUserDto = new ArrayList<>();
@@ -87,7 +110,7 @@ public class FriendRequestServiceImpl {
 		if (user == null)
 			return new BaseResponse<>(false, "Người dùng không tồn tại");
 		List<FriendRequestEntity> receivedReqList = user.getReceivedFriendRequest();
-		if (receivedReqList == null && receivedReqList.isEmpty())
+		if (receivedReqList == null || receivedReqList.isEmpty())
 			return new BaseResponse<>(false, "Không có lời mời kết bạn đã nhận", null);
 		List<UserEntity> receivedReqUserEntity = new ArrayList<>();
 		List<UserDTO> receivedReqUserDto = new ArrayList<>();
@@ -102,7 +125,7 @@ public class FriendRequestServiceImpl {
 		return new BaseResponse<UserDTO>(true, "Thành công", receivedReqUserDto);
 	}
 
-	public BaseResponse<Void> acceptFriendRequest(UserEntity sender, UserEntity receiver) {
+	public BaseResponse<FriendRequestDTO> acceptFriendRequest(UserEntity sender, UserEntity receiver) {
 		if (sender == null || receiver == null)
 			return new BaseResponse<>(false, "Người dùng không tồn tại");
 		try {
@@ -112,7 +135,7 @@ public class FriendRequestServiceImpl {
 				FriendRequestEntity updatedFrReq = friendRequestRepo.save(frReq);
 				FcmSender.sendMultiMessage(receiver.getUserName() + " Đã chấp nhận lời mời kết bạn.", "", "", sender);
 				if (updatedFrReq.getStatus() == FriendRequestStatus.ACCEPTED) {
-					return new BaseResponse<>(true, "Kết bạn thành công");
+					return new BaseResponse<>(true, "Kết bạn thành công", List.of(FriendRequestDTOConverter.getInstance().toDTO(updatedFrReq)));
 				}
 			}
 		} catch (Exception e) {
@@ -121,7 +144,7 @@ public class FriendRequestServiceImpl {
 		return new BaseResponse<>(false, "Lỗi kết bạn");
 	}
 
-	public BaseResponse<Void> cancelFriendRequest(UserEntity sender, UserEntity receiver) {
+	public BaseResponse<FriendRequestDTO> cancelFriendRequest(UserEntity sender, UserEntity receiver) {
 		if (sender == null || receiver == null)
 			return new BaseResponse<>(false, "Người dùng không tồn tại");
 		FriendRequestEntity frReq = friendRequestRepo.findBySenderAndReceiver(sender, receiver);
@@ -129,13 +152,13 @@ public class FriendRequestServiceImpl {
 			frReq.setStatus(FriendRequestStatus.CANCELED);
 			FriendRequestEntity updatedFrReq = friendRequestRepo.save(frReq);
 			if (updatedFrReq != null && updatedFrReq.getStatus() == FriendRequestStatus.CANCELED) {
-				return new BaseResponse<>(true, "Hủy kết bạn thành công");
+				return new BaseResponse<>(true, "Hủy kết bạn thành công", List.of(FriendRequestDTOConverter.getInstance().toDTO(updatedFrReq)));
 			}
 		}
 		return new BaseResponse<>(false, "Lỗi hủy kết bạn");
 	}
 
-	public BaseResponse<Void> rejectFriendRequest(UserEntity sender, UserEntity receiver) {
+	public BaseResponse<FriendRequestDTO> rejectFriendRequest(UserEntity sender, UserEntity receiver) {
 		if (sender == null || receiver == null)
 			return new BaseResponse<>(false, "Người dùng không tồn tại");
 		FriendRequestEntity frReq = friendRequestRepo.findBySenderAndReceiver(sender, receiver);
@@ -144,7 +167,7 @@ public class FriendRequestServiceImpl {
 			friendRequestRepo.save(frReq);
 			FriendRequestEntity updatedFrReq = friendRequestRepo.save(frReq);
 			if (updatedFrReq != null && updatedFrReq.getStatus() == FriendRequestStatus.REJECTED) {
-				return new BaseResponse<>(true, "Từ chối kết bạn thành công");
+				return new BaseResponse<>(true, "Từ chối kết bạn thành công", List.of(FriendRequestDTOConverter.getInstance().toDTO(updatedFrReq)));
 			}
 		}
 		return new BaseResponse<>(false, "Lỗi từ chối kết bạn");
@@ -181,13 +204,19 @@ public class FriendRequestServiceImpl {
 
 	public boolean removeFriendRequest(UserEntity user1, UserEntity user2) {
 		FriendRequestEntity frReq1 = friendRequestRepo.findBySenderAndReceiver(user1, user2);
+		FriendRequestEntity newFrReq1 = null;
 		if (frReq1 != null) {
 			friendRequestRepo.delete(frReq1);
+//			frReq1.setStatus(FriendRequestStatus.REMOVED);
+//			newFrReq1 = friendRequestRepo.save(frReq1);
 		}
 
 		FriendRequestEntity frReq2 = friendRequestRepo.findBySenderAndReceiver(user2, user1);
+		FriendRequestEntity newFrReq2 = null;
 		if (frReq2 != null) {
 			friendRequestRepo.delete(frReq2);
+//			frReq2.setStatus(FriendRequestStatus.REMOVED);
+//			newFrReq2 = friendRequestRepo.save(frReq2);
 		}
 
 		if (friendRequestRepo.findBySenderAndReceiver(user2, user1) == null
