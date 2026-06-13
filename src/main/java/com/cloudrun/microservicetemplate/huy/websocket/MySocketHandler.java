@@ -46,12 +46,6 @@ public class MySocketHandler extends TextWebSocketHandler {
 		JsonNode jsonNode = objectMapper.readTree(payload);
 		if (jsonNode.has("type")) {
 			String type = jsonNode.get("type").asText();
-//			switch (type) {
-//			case WebSocketObjectType.new_frend_request.name():
-//				ChatMessageDTO chatDto = objectMapper.treeToValue(jsonNode, ChatMessageDTO.class);
-//				handleChatMessage(chatDto, session);
-//				break;
-//			}
 			if (type.equals(WebSocketObjectType.chat_send.name())) {
 				ChatMessageDTO chatDto = objectMapper.treeToValue(jsonNode, ChatMessageDTO.class);
 				handleChatMessage(chatDto, session);

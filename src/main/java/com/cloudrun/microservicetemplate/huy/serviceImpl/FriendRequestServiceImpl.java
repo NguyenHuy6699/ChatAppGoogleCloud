@@ -37,11 +37,24 @@ public class FriendRequestServiceImpl {
 		}
 
 		FriendRequestEntity existFrReq = friendRequestRepo.findBySenderAndReceiver(sender, receiver);
+		BaseResponse<FriendRequestDTO> res = new BaseResponse<>();
 		if (existFrReq != null) {
 			System.out.println("friend request. From: " + sender.getUserName() + ". To: " + receiver.getUserName()
 					+ " : (request already exist)");
-			existFrReq.setStatus(FriendRequestStatus.WAITING);
-			friendRequestRepo.save(existFrReq);
+			if (existFrReq.getStatus() == FriendRequestStatus.ACCEPTED) {
+				res.setOk(false);
+				res.setMessage("Đã là bạn bè");
+				return res;
+			} else if (existFrReq.getStatus() == FriendRequestStatus.WAITING) {
+				res.setOk(true);
+				res.setMessage("Kết bạn thành công");
+				res.setDataList(List.of(FriendRequestDTOConverter.getInstance().toDTO(existFrReq)));
+				return res;
+			} else {
+				existFrReq.setStatus(FriendRequestStatus.WAITING);
+				friendRequestRepo.save(existFrReq);
+			}
+			
 		} else {
 			FriendRequestEntity frReq = new FriendRequestEntity();
 			frReq.setSender(sender);
@@ -51,7 +64,6 @@ public class FriendRequestServiceImpl {
 		}
 
 		FriendRequestEntity newFrReq = friendRequestRepo.findBySenderAndReceiver(sender, receiver);
-		BaseResponse<FriendRequestDTO> res = new BaseResponse<>();
 		if (newFrReq != null) {
 			System.out.println("Saved friend request. From: " + sender.getUserName() + ". To: " + receiver.getUserName()
 					+ " : " + newFrReq);
@@ -130,12 +142,22 @@ public class FriendRequestServiceImpl {
 			return new BaseResponse<>(false, "Người dùng không tồn tại");
 		try {
 			FriendRequestEntity frReq = friendRequestRepo.findBySenderAndReceiver(sender, receiver);
+			BaseResponse<FriendRequestDTO> resp = new BaseResponse<>();
 			if (frReq != null) {
-				frReq.setStatus(FriendRequestStatus.ACCEPTED);
-				FriendRequestEntity updatedFrReq = friendRequestRepo.save(frReq);
-				FcmSender.sendMultiMessage(receiver.getUserName() + " Đã chấp nhận lời mời kết bạn.", "", "", sender);
-				if (updatedFrReq.getStatus() == FriendRequestStatus.ACCEPTED) {
-					return new BaseResponse<>(true, "Kết bạn thành công", List.of(FriendRequestDTOConverter.getInstance().toDTO(updatedFrReq)));
+				if (frReq.getStatus() == FriendRequestStatus.CANCELED) {
+					resp.setOk(false);
+					resp.setMessage("Yêu cầu không tồn tại");
+					return resp;
+				} else {
+					frReq.setStatus(FriendRequestStatus.ACCEPTED);
+					FriendRequestEntity updatedFrReq = friendRequestRepo.save(frReq);
+					FcmSender.sendMultiMessage(receiver.getUserName() + " Đã chấp nhận lời mời kết bạn.", "", "", sender);
+					if (updatedFrReq.getStatus() == FriendRequestStatus.ACCEPTED) {
+						resp.setOk(true);
+						resp.setMessage("Kết bạn thành công");
+						resp.setDataList(List.of(FriendRequestDTOConverter.getInstance().toDTO(updatedFrReq)));
+						return resp;
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -145,14 +167,29 @@ public class FriendRequestServiceImpl {
 	}
 
 	public BaseResponse<FriendRequestDTO> cancelFriendRequest(UserEntity sender, UserEntity receiver) {
+		BaseResponse<FriendRequestDTO> resp = new BaseResponse<>();
 		if (sender == null || receiver == null)
 			return new BaseResponse<>(false, "Người dùng không tồn tại");
 		FriendRequestEntity frReq = friendRequestRepo.findBySenderAndReceiver(sender, receiver);
 		if (frReq != null) {
-			frReq.setStatus(FriendRequestStatus.CANCELED);
-			FriendRequestEntity updatedFrReq = friendRequestRepo.save(frReq);
-			if (updatedFrReq != null && updatedFrReq.getStatus() == FriendRequestStatus.CANCELED) {
-				return new BaseResponse<>(true, "Hủy kết bạn thành công", List.of(FriendRequestDTOConverter.getInstance().toDTO(updatedFrReq)));
+			if (frReq.getStatus() == FriendRequestStatus.ACCEPTED) {
+				resp.setOk(false);
+				resp.setMessage("Đã là bạn bè");
+				return resp;
+			} else if (frReq.getStatus() == FriendRequestStatus.REJECTED) {
+				resp.setOk(true);
+				resp.setMessage("Hủy kết bạn thành công");
+				resp.setDataList(List.of(FriendRequestDTOConverter.getInstance().toDTO(frReq)));
+				return resp;
+			} else {
+				frReq.setStatus(FriendRequestStatus.CANCELED);
+				FriendRequestEntity updatedFrReq = friendRequestRepo.save(frReq);
+				if (updatedFrReq != null && updatedFrReq.getStatus() == FriendRequestStatus.CANCELED) {
+					resp.setOk(true);
+					resp.setMessage("Hủy kết bạn thành công");
+					resp.setDataList(List.of(FriendRequestDTOConverter.getInstance().toDTO(updatedFrReq)));
+					return resp;
+				}
 			}
 		}
 		return new BaseResponse<>(false, "Lỗi hủy kết bạn");
@@ -162,15 +199,26 @@ public class FriendRequestServiceImpl {
 		if (sender == null || receiver == null)
 			return new BaseResponse<>(false, "Người dùng không tồn tại");
 		FriendRequestEntity frReq = friendRequestRepo.findBySenderAndReceiver(sender, receiver);
+		BaseResponse<FriendRequestDTO> resp = new BaseResponse<>();
 		if (frReq != null) {
-			frReq.setStatus(FriendRequestStatus.REJECTED);
-			friendRequestRepo.save(frReq);
-			FriendRequestEntity updatedFrReq = friendRequestRepo.save(frReq);
-			if (updatedFrReq != null && updatedFrReq.getStatus() == FriendRequestStatus.REJECTED) {
-				return new BaseResponse<>(true, "Từ chối kết bạn thành công", List.of(FriendRequestDTOConverter.getInstance().toDTO(updatedFrReq)));
+			if (frReq.getStatus() == FriendRequestStatus.CANCELED) {
+				resp.setOk(false);
+				resp.setMessage("Yêu cầu không tồn tại");
+			} else {
+				frReq.setStatus(FriendRequestStatus.REJECTED);
+				friendRequestRepo.save(frReq);
+				FriendRequestEntity updatedFrReq = friendRequestRepo.save(frReq);
+				if (updatedFrReq != null && updatedFrReq.getStatus() == FriendRequestStatus.REJECTED) {
+					resp.setOk(true);
+					resp.setMessage("Từ chối kết bạn thành công");
+					resp.setDataList(List.of(FriendRequestDTOConverter.getInstance().toDTO(updatedFrReq)));
+					return resp;
+				}
 			}
 		}
-		return new BaseResponse<>(false, "Lỗi từ chối kết bạn");
+		resp.setOk(false);
+		resp.setMessage("Lỗi từ chối kết bạn");
+		return resp;
 	}
 
 	public BaseResponse<FriendRequestDTO> getRelationship(UserEntity loggedUser, UserEntity user) {
