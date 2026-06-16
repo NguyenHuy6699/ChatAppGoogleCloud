@@ -16,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.cloudrun.microservicetemplate.huy.baseResponse.BaseResponse;
 import com.cloudrun.microservicetemplate.huy.constant.Paths;
-import com.cloudrun.microservicetemplate.huy.constant.ResponseType;
 import com.cloudrun.microservicetemplate.huy.constant.SessionAtributes;
 import com.cloudrun.microservicetemplate.huy.constant.WebSocketObjectType;
 import com.cloudrun.microservicetemplate.huy.converter.UserDTOConverter;
@@ -127,13 +126,11 @@ public class UserController {
 			HttpServletRequest req
 			) {
 		HttpSession session = req.getSession(false);
-		if (session == null || session.getAttribute(SessionAtributes.userName) == null) {
-			return new BaseResponse<>(false, "Hết phiên đăng nhập", null, ResponseType.session_expired);
-		}
 		String sessionUserName = (String) session.getAttribute(SessionAtributes.userName);
 		if (!sessionUserName.equals(loggedUserName)) {
 			return new BaseResponse<>(false, "Người dùng không hợp lệ", null);
 		}
+		userDto.setUserName(loggedUserName);
 		BaseResponse<UserDTO> resp = userService.updateProfile(loggedUserName, userDto);
 		if (resp.isOk()) {
 			session.setAttribute(SessionAtributes.userName, userDto.getUserName());
@@ -144,9 +141,6 @@ public class UserController {
 	@PostMapping(Paths.change_password)
 	public BaseResponse<Void> changePassWord(@RequestParam String loggedUserName, @RequestParam String oldPassWord, @RequestParam String newPassWord, HttpServletRequest req) {
 		HttpSession session = req.getSession(false);
-		if (session == null || session.getAttribute(SessionAtributes.userName) == null) {
-			return new BaseResponse<>(false, "Hết phiên đăng nhập", null);
-		}
 		String sessionUserName = (String) session.getAttribute(SessionAtributes.userName);
 		if (!sessionUserName.equals(loggedUserName)) {
 			return new BaseResponse<>(false, "Người dùng không hợp lệ", null);
