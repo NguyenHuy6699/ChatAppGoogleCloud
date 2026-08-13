@@ -40,14 +40,18 @@ public class ContactsController {
 			ChatMessageDTO lastMessage = chatService.getLastMessage(userName, user.getUserName());
 			List<ChatMessage> last50Messages = chatService.getChatHistory(userName, user.getUserName(), 0, 50);
 			int unreadMessages = 0;
-			for (ChatMessage message : last50Messages) {
-				if (!message.isRead() 
-						&& message.getSender().getUserName().equals(user.getUserName())
-						&& message.getReceiver().getUserName().equals(userName)) {
-					unreadMessages++;
+			
+			if (last50Messages != null && !last50Messages.isEmpty()) {
+				for (ChatMessage message : last50Messages) {
+					if (!message.isRead() 
+							&& message.getSender().getUserName().equals(user.getUserName())
+							&& message.getReceiver().getUserName().equals(userName)) {
+						unreadMessages++;
+					}
 				}
+				user.setLastMessage(lastMessage.getMessage());
 			}
-			user.setLastMessage(lastMessage.getMessage());
+			
 			user.setUnreadMessages(unreadMessages);
 		}
 		resp.setDataList(listDTO);
